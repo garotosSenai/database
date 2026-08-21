@@ -32,4 +32,14 @@ public class Usuario {
     private String senha;
     private String[] roles;
 
+    public Usuario(Usuario u) {
+        this.nome = u.getNome();
+        this.email = u.getEmail();
+        this.telefone = u.getTelefone();
+        this.senha = u.getSenha();
+        this.roles = new String[]{"USER"};
+    }
+
+
+
 }

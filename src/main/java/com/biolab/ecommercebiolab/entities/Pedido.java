@@ -23,4 +23,12 @@ public class Pedido {
     @ManyToOne
     private Usuario cliente;
 
+
+    public Pedido(PedidoDTO u) {
+        this.momento = u.getMomento();
+        this.status = StatusPedido.AGUARDANDO_PAGAMENTO;
+        //this.cliente = u.getCliente();
+
+    }
+
 }

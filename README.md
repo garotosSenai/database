@@ -1,4 +1,4 @@
-# 💜 Destiny — Banco de Dados
+#  Destiny — Banco de Dados
 
 ## 1. Sobre o projeto
 

@@ -1,151 +1,164 @@
-create database if not exists destiny;
+create database if not exists destiny
+character set utf8mb4
+collate utf8mb4_unicode_ci;
 use destiny;
 
-create table if not exists usuarios(
-    id_usuario varchar(36) primary key,
-    email_usuario varchar(255) not null unique,
-    senha_usuario varchar(255) not null,
-    dt_nasc date not null,
-    dt_cadastro datetime default current_timestamp
+create table if not exists usuario (
+    id_usuario bigint auto_increment primary key,
+    ativo bit(1) default b'1',
+    criado_em datetime(6) default current_timestamp(6),
+    data_nascimento date not null,
+    email varchar(255) not null unique,
+    senha varchar(255) not null
 );
 
-create table if not exists interesses(
-    id_interesse varchar(36) primary key,
-    nome_interesse varchar(100) not null,
-    categoria_interesse varchar(100) not null,
-    descricao_interesse text
-);
-
-create table if not exists perfil(
-    id_perfil varchar(36) primary key,
-    usuario_id varchar(36) not null unique,
-    nome_pessoa varchar(255) not null,
-    genero varchar(50),
-    biografia text,
-    cidade varchar(150),
-    estado varchar(50),
-    longitude double,
-    latitude double,
+create table if not exists perfil (
+    id_perfil bigint auto_increment primary key,
     altura_cm int,
-    signo varchar(50),
-    escolaridade varchar(100),
-    estado_profissional varchar(150),
-    mostrar_sexualidade boolean default false,
-    foreign key (usuario_id) references usuarios(id_usuario) on delete cascade
+    bio varchar(255),
+    escolaridade varchar(255),
+    estado_profissional varchar(255),
+    genero varchar(255),
+    id_usuario bigint not null unique,
+    identidade_genero varchar(255),
+    cidade varchar(255),
+    estado varchar(255),
+    latitude double,
+    longitude double,
+    mostrar_identidade_genero bit(1) default b'0',
+    mostrar_orientacao bit(1) default b'0',
+    nome varchar(255),
+    orientacao_sexual varchar(255),
+    signo varchar(255),
+    tipo_relacionamento varchar(255),
+
+    constraint fk_perfil_usuario
+    foreign key (id_usuario)
+    references usuario(id_usuario)
+    on delete cascade
 );
 
-create table if not exists perfilorientacaosexual(
-    perfil_id varchar(36) not null,
-    orientacao_sexual varchar(50) not null,
-    primary key (perfil_id, orientacao_sexual),
-    foreign key (perfil_id) references perfil(id_perfil) on delete cascade
+create table if not exists foto (
+    id_foto bigint auto_increment primary key,
+    criado_em datetime(6) default current_timestamp(6),
+    ordem int,
+    url varchar(255) not null
 );
 
-create table if not exists perfilinteresse(
-    perfil_id varchar(36) not null,
-    interesse_id varchar(36) not null,
-    primary key (perfil_id, interesse_id),
-    foreign key (perfil_id) references perfil(id_perfil) on delete cascade,
-    foreign key (interesse_id) references interesses(id_interesse) on delete cascade
+create table if not exists matches (
+    id_match bigint auto_increment primary key,
+    ativo bit(1) default b'1',
+    criado_em datetime(6) default current_timestamp(6),
+    id_usuario1 bigint not null,
+    id_usuario2 bigint not null,
+
+    constraint fk_match_usuario1
+    foreign key (id_usuario1)
+    references usuario(id_usuario)
+    on delete cascade,
+
+    constraint fk_match_usuario2
+    foreign key (id_usuario2)
+    references usuario(id_usuario)
+    on delete cascade
 );
 
-create table if not exists preferencia(
+create table if not exists hobby (
+    id_hobby bigint auto_increment primary key,
+    categoria varchar(255),
+    descricao varchar(255),
+    nome varchar(255) not null
+);
+
+create table if not exists preferencia_busca (
     id_preferencia bigint auto_increment primary key,
-    usuario_id varchar(36) not null unique,
+    altura_maxima_cm int,
+    altura_minima_cm int,
+    distancia_maxima_km double,
+    escolaridade varchar(255),
+    estado_profissional varchar(255),
+    id_usuario bigint not null,
     idade_maxima int,
     idade_minima int,
-    distancia_maxima_km double,
-    distancia_minima_km double,
-    altura_minima_cm int,
-    altura_maxima_cm int,
-    foreign key (usuario_id) references usuarios(id_usuario) on delete cascade
+    signo varchar(255),
+    tipo_relacionamento varchar(255),
+
+    constraint fk_preferencia_usuario
+    foreign key (id_usuario)
+    references usuario(id_usuario)
+    on delete cascade
 );
 
-create table if not exists preferenciagenero(
-    preferencia_id bigint not null,
-    genero varchar(50) not null,
-    primary key (preferencia_id, genero),
-    foreign key (preferencia_id) references preferencia(id_preferencia) on delete cascade
+create table if not exists bloqueio (
+    id_bloqueio bigint auto_increment primary key,
+    criado_em datetime(6) default current_timestamp(6),
+    id_bloqueado bigint not null,
+    id_bloqueador bigint not null,
+
+    constraint fk_bloqueio_bloqueado
+    foreign key (id_bloqueado)
+    references usuario(id_usuario)
+    on delete cascade,
+
+    constraint fk_bloqueio_bloqueador
+    foreign key (id_bloqueador)
+    references usuario(id_usuario)
+    on delete cascade
 );
 
-create table if not exists preferenciasigno(
-    preferencia_id bigint not null,
-    signo varchar(50) not null,
-    primary key (preferencia_id, signo),
-    foreign key (preferencia_id) references preferencia(id_preferencia) on delete cascade
+create table if not exists interacao (
+    id_interacao bigint auto_increment primary key,
+    criado_em datetime(6) default current_timestamp(6),
+    id_destino bigint not null,
+    id_origem bigint not null,
+    tipo varchar(50) not null,
+
+    constraint fk_interacao_destino
+    foreign key (id_destino)
+    references usuario(id_usuario)
+    on delete cascade,
+
+    constraint fk_interacao_origem
+    foreign key (id_origem)
+    references usuario(id_usuario)
+    on delete cascade
 );
 
-create table if not exists preferenciaescolaridade(
-    preferencia_id bigint not null,
-    escolaridade varchar(100) not null,
-    primary key (preferencia_id, escolaridade),
-    foreign key (preferencia_id) references preferencia(id_preferencia) on delete cascade
+create table if not exists mensagem (
+    id_mensagem bigint auto_increment primary key,
+    conteudo varchar(255) not null,
+    enviada_em datetime(6) default current_timestamp(6),
+    id_match bigint not null,
+    id_remetente bigint not null,
+    visualizada_em datetime(6),
+
+    constraint fk_mensagem_match
+    foreign key (id_match)
+    references matches(id_match)
+    on delete cascade,
+
+    constraint fk_mensagem_remetente
+    foreign key (id_remetente)
+    references usuario(id_usuario)
+    on delete cascade
 );
 
-create table if not exists preferenciaestadoprofissional(
-    preferencia_id bigint not null,
-    estado_profissional varchar(150) not null,
-    primary key (preferencia_id, estado_profissional),
-    foreign key (preferencia_id) references preferencia(id_preferencia) on delete cascade
-);
+create table if not exists denuncia (
+    id_denuncia bigint auto_increment primary key,
+    criado_em datetime(6) default current_timestamp(6),
+    descricao varchar(255),
+    id_denunciado bigint not null,
+    id_denunciante bigint not null,
+    motivo varchar(50) not null,
+    status varchar(50),
 
-create table if not exists fotos(
-    id_foto varchar(36) primary key,
-    perfil_id varchar(36) not null,
-    url varchar(255) not null,
-    ordem_fotos int,
-    criado_em datetime default current_timestamp,
-    foreign key (perfil_id) references perfil(id_perfil) on delete cascade
-);
+    constraint fk_denuncia_denunciado
+    foreign key (id_denunciado)
+    references usuario(id_usuario)
+    on delete cascade,
 
-create table if not exists bloqueios(
-    id_bloqueio varchar(36) primary key,
-    bloqueador varchar(36) not null,
-    bloqueado varchar(36) not null,
-    criado_em datetime default current_timestamp,
-    foreign key (bloqueador) references usuarios(id_usuario) on delete cascade,
-    foreign key (bloqueado) references usuarios(id_usuario) on delete cascade
-);
-
-create table if not exists interacoes(
-    id_interacao varchar(36) primary key,
-    origem_interacao varchar(36) not null,
-    destino_interacao varchar(36) not null,
-    tipo_interacao varchar(50) not null,
-    criado_em datetime default current_timestamp,
-    foreign key (origem_interacao) references usuarios(id_usuario) on delete cascade,
-    foreign key (destino_interacao) references usuarios(id_usuario) on delete cascade
-);
-
-create table if not exists matches(
-    id_match varchar(36) primary key,
-    usuario1 varchar(36) not null,
-    usuario2 varchar(36) not null,
-    criado_em datetime default current_timestamp,
-    ativo boolean default true,
-    foreign key (usuario1) references usuarios(id_usuario) on delete cascade,
-    foreign key (usuario2) references usuarios(id_usuario) on delete cascade
-);
-
-create table if not exists mensagens(
-    id_mensagem varchar(36) primary key,
-    match_id varchar(36) not null,
-    remetente varchar(36) not null,
-    conteudo text not null,
-    enviada_em datetime default current_timestamp,
-    visualizada_em datetime,
-    foreign key (match_id) references matches(id_match) on delete cascade,
-    foreign key (remetente) references usuarios(id_usuario) on delete cascade
-);
-
-create table if not exists denuncias(
-    id_denuncia varchar(36) primary key,
-    denunciante varchar(36) not null,
-    denunciado varchar(36) not null,
-    motivo_denuncia varchar(100) not null,
-    descricao text,
-    criada_em datetime default current_timestamp,
-    status_denuncia varchar(50),
-    foreign key (denunciante) references usuarios(id_usuario) on delete cascade,
-    foreign key (denunciado) references usuarios(id_usuario) on delete cascade
+    constraint fk_denuncia_denunciante
+    foreign key (id_denunciante)
+    references usuario(id_usuario)
+    on delete cascade
 );

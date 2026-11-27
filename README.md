@@ -1,4 +1,5 @@
  Destiny — Banco de Dados
+ 
 📌 Sobre o projeto
 
 O Destiny é um banco de dados desenvolvido para uma plataforma de relacionamentos, com o objetivo de armazenar e gerenciar informações dos usuários, seus perfis, preferências, interesses e interações.
